@@ -1,6 +1,7 @@
 import React from 'react';
 import TickerInput from './components/tickerinput.js';
-import Chart from './components/chart.js';
+import Chart5y from './components/chart5y.js';
+import Chart30d from './components/chart30d.js';
 import {getDataByTicker} from './stockdata.js';
 
 class Bootstrap extends React.Component {
@@ -36,20 +37,9 @@ class Bootstrap extends React.Component {
   }
 
   retrieveData(ticker) {
-    const cache = JSON.parse(localStorage.getItem(ticker));
-    let d = new Date();
-    let now = Math.ceil(d.getTime() / 1000);
-    if (!cache || (cache.requestTime+60)<now) {
-      getDataByTicker(ticker).then(data => {
-        localStorage.setItem(ticker, JSON.stringify({
-          requestTime: now,
-          data
-        }));
-        this.setState({data});
-      });
-    } else {
-      this.setState({ data: cache.data });
-    }
+    getDataByTicker(ticker).then(data => {
+      this.setState({data});
+    });
   }
 
   onAnalyze(event) {
@@ -61,7 +51,7 @@ class Bootstrap extends React.Component {
     return (
       <div className="row">
         <div className="col">
-          <Chart data={this.state.data} height={this.state.height}/>
+          <Chart5y data={this.state.data && this.state.data.data5y} height={this.state.height}/>
         </div>
         <div className="col">
           <h1>Indicator Checklist</h1>
@@ -74,6 +64,9 @@ class Bootstrap extends React.Component {
           <li>MACD</li>
           <li>Volume</li>
           </ul>
+        </div>
+        <div className="col">
+          <Chart30d data={this.state.data && this.state.data.data30d} height={this.state.height}/>
         </div>
       </div>
     );

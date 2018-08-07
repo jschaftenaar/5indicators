@@ -4,7 +4,7 @@ import HighchartsReact from 'highcharts-react-official'
 import { darkunica as theme } from '../charttheme.js';
 import merge from 'deepmerge';
 
-const Chart = ({data, height}) => {
+const Chart30d = ({data, height}) => {
   if (!data) return '';
   const options = {
     chart: {
@@ -19,11 +19,31 @@ const Chart = ({data, height}) => {
     },
     rangeSelector: { selected: 0},
     navigator: {enabled: false},
+    rangeSelector: {
+        buttons: [{
+            type: 'hour',
+            count: 1,
+            text: '1h'
+        }, {
+            type: 'day',
+            count: 1,
+            text: '1D'
+        }, {
+            type: 'day',
+            count: 5,
+            text: '5D'
+        }, {            type: 'all',
+            count: 1,
+            text: 'All'
+        }],
+        selected: 1,
+        inputEnabled: false
+    },
 
     yAxis: [
       {
         labels: {
-          align: 'right',
+          align: 'left',
         },
         title: {
           text: 'Close'
@@ -35,7 +55,7 @@ const Chart = ({data, height}) => {
         height: "39%"
       }, {
         labels: {
-            align: 'right',
+            align: 'left',
         },
         title: {
             text: 'Moving Averages'
@@ -49,7 +69,7 @@ const Chart = ({data, height}) => {
         },
       }, {
         labels: {
-          align: 'right',
+          align: 'left',
         },
         title: {
           text: 'Volume'
@@ -62,18 +82,19 @@ const Chart = ({data, height}) => {
     ],
     series: [
       {
+        type: 'candlestick',
         data: data.close,
         name: 'Day Close',
         animation: false
       },
       {
-        data: data.sma100,
+        data: data.high,
         name: 'Simple Moving Average 100',
         yAxis: 1,
         animation: false
       },
       {
-        data: data.sma200,
+        data: data.low,
         name: 'Simple Moving Average 200',
         yAxis: 1,
         animation: false
@@ -96,4 +117,4 @@ const Chart = ({data, height}) => {
   );
 }
 
-export default Chart
+export default Chart30d
