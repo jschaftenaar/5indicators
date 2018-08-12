@@ -50,8 +50,12 @@ class Bootstrap extends React.Component {
   render() {
     return (
       <div className="row">
-        <div className="col">
-          <Chart5y data={this.state.data && this.state.data.data5y} height={this.state.height}/>
+        <div className="col-5">
+          <Chart5y
+            data={this.state.data && this.state.data.data5y}
+            height={this.state.height}
+            rangeSelected={0}
+          />
         </div>
         <div className="col">
           <h1>Indicator Checklist</h1>
@@ -65,8 +69,16 @@ class Bootstrap extends React.Component {
           <li>Volume</li>
           </ul>
         </div>
-        <div className="col">
-          <Chart30d data={this.state.data && this.state.data.data30d} height={this.state.height}/>
+        <div className="col-5">
+          <Chart30d
+            data={this.state.data && this.state.data.data30d}
+            height={this.state.height}
+            rangeSelected={0}
+            rangeChange={(event) => {
+              console.log('clicked here');
+              console.log(event);
+            }}
+          />
         </div>
       </div>
     );

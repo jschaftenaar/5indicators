@@ -32,11 +32,26 @@ export function get30d(ticker) {
   });
 }
 
+export function adjustTimezone(date) {
+  return data;
+}
+
+export function dateFromDate(date) {
+  const d = date.split('-');
+  const newDate = new Date(d[0], d[1]-1, d[2]);
+  return newDate.getTime();
+}
+
+export function dateFromDateWithMinute(date, minute) {
+    const d = date;
+    const t = minute.split(':');
+    const newDate = new Date(d.substring(0,4), d.substring(4,6)-1, d.substring(6),t[0], t[1]);
+    return newDate.getTime();
+}
+
 export function convert5yToSet(input) {
   const result = [];
   input.data.forEach(item => {
-    const d = item.date.split('-');
-    const date = new Date(d[0], d[1]-1, d[2]);
     result.push({
       open: item.open,
       high: item.high,
@@ -44,7 +59,7 @@ export function convert5yToSet(input) {
       close: item.close,
       volume: item.volume,
       label: item.label,
-      date: date.getTime()
+      date: dateFromDate(item.date)
     })
   });
   return result;
@@ -53,10 +68,6 @@ export function convert5yToSet(input) {
 export function convert30dToSet(input) {
   const result = [];
   input.forEach(item => {
-    const d = item.date;
-    const t = item.minute.split(':');
-    console.log(d.substring(0,4), d.substring(4,6), d.substring(6),t[0], t[1]);
-    const date = new Date(d.substring(0,4), d.substring(4,6)-1, d.substring(6),t[0], t[1]);
     result.push({
       open: item.marketOpen,
       high: item.marketHigh,
@@ -64,12 +75,17 @@ export function convert30dToSet(input) {
       close: item.marketClose,
       volume: item.marketVolume,
       label: item.label,
-      date: date.getTime()
+      date: dateFromDateWithMinute(item.date, item.minute)
     })
   });
   return result;
 }
 
+
+export function average(array) {
+  let sum = array.reduce((a,b) => { return a+b });
+  return sum / array.length;
+}
 
 export function buildObject(array) {
   const open = [];
@@ -79,19 +95,64 @@ export function buildObject(array) {
   const volume = [];
   const sma100 = [];
   const sma200 = [];
+  const ema10 = [];
+  const ema20 = [];
+  const ema50 = [];
+  const candlestick = [];
 
 
-  array.forEach((item) => {
+  const trailing100 = [];
+  const trailing200 = [];
+  const trailing10 = [];
+  const trailing20 = [];
+  const trailing50 = [];
+
+  array.forEach((item, index) => {
     const date = item.date;
-    open.push([date, item.open]),
-    high.push([date, item.high]),
-    low.push([date, item.low]),
-    close.push([date, item.close]),
-    volume.push([date, item.volume]),
-    sma100.push([date, item.high]),
-    sma200.push([date, item.low])
-  });
+    open.push([date, item.open]);
+    high.push([date, item.high]);
+    low.push([date, item.low]);
+    close.push([date, item.close]);
+    volume.push([date, item.volume]);
 
+    // calculate eponential moving averages
+    // for 10, 20 and 50
+
+    trailing10.push(item.close);
+    trailing20.push(item.close);
+    trailing50.push(item.close);
+
+    if (index==0) {
+      ema10.push([date, item.close]);
+      ema20.push([date, item.close]);
+      ema50.push([date, item.close]);
+    } else {
+      let ema = (item.close - ema10[ema10.length-1][1]) * (2/11) + ema10[ema10.length-1][1]
+      ema10.push([date, ema]);
+      ema = (item.close - ema20[ema20.length-1][1]) * (2/21) + ema20[ema20.length-1][1]
+      ema20.push([date, ema]);
+      ema = (item.close - ema50[ema50.length-1][1]) * (2/51) + ema50[ema50.length-1][1]
+      ema50.push([date, ema]);
+    }
+    // calculate simple moving average
+    trailing100.push(item.close);
+    trailing200.push(item.close);
+    if (trailing100.length>100) {
+      trailing100.shift();
+      sma100.push([date, average(trailing100)]);
+    }
+    if (trailing200.length>200) {
+      trailing200.shift();
+      sma200.push([date, average(trailing200)]);
+    }
+    candlestick.push([
+      date,
+      item.open,
+      item.high,
+      item.low,
+      item.close
+    ]);
+  });
   return {
     open,
     high,
@@ -99,7 +160,11 @@ export function buildObject(array) {
     close,
     volume,
     sma100,
-    sma200
+    sma200,
+    ema10,
+    ema20,
+    ema50,
+    candlestick
   };
 
 }
@@ -115,7 +180,6 @@ export function getDataByTicker(ticker) {
       data5y: buildObject(convert5yToSet(data5y)),
       data30d: buildObject(convert30dToSet(data30d))
     };
-    console.log(result.data30d);
     return result;
   })
 

@@ -4,9 +4,12 @@ import HighchartsReact from 'highcharts-react-official'
 import { darkunica as theme } from '../charttheme.js';
 import merge from 'deepmerge';
 
-const Chart5y = ({data, height}) => {
+const Chart5y = ({data, height, rangeSelected}) => {
   if (!data) return '';
   const options = {
+    time: {
+      useUTC: false
+    },
     chart: {
       height,
       animation: false
@@ -17,23 +20,23 @@ const Chart5y = ({data, height}) => {
     scrollbar: {
         enabled: false
     },
-    rangeSelector: { selected: 0},
+    rangeSelector: { selected: rangeSelected},
     navigator: {enabled: false},
 
     yAxis: [
       {
+        crosshair: true,
         labels: {
           align: 'right',
         },
         title: {
           text: 'Close'
         },
-        resize: {
-          enabled: true
-        },
         lineWidth: 2,
         height: "39%"
       }, {
+        crosshair: true,
+
         labels: {
             align: 'right',
         },
@@ -44,10 +47,9 @@ const Chart5y = ({data, height}) => {
         lineWidth: 2,
         top: "40%",
         offset: 0,
-        resize: {
-          enabled: true
-        },
       }, {
+        crosshair: true,
+
         labels: {
           align: 'right',
         },
@@ -60,6 +62,9 @@ const Chart5y = ({data, height}) => {
         height: "14%"
       }
     ],
+    tooltip: {
+      valueDecimals: 2,
+    },
     series: [
       {
         data: data.close,
@@ -67,18 +72,33 @@ const Chart5y = ({data, height}) => {
         animation: false
       },
       {
-        data: data.high,
+        data: data.sma100,
         name: 'Simple Moving Average 100',
         yAxis: 1,
         animation: false
       },
       {
-        data: data.low,
+        data: data.sma200,
         name: 'Simple Moving Average 200',
+        yAxis: 1,
+        animation: false
+      }, {
+        data: data.ema10,
+        name: 'Exponential Moving Average 10',
         yAxis: 1,
         animation: false
       },
       {
+        data: data.ema20,
+        name: 'Exponential Moving Average 20',
+        yAxis: 1,
+        animation: false
+      }, {
+        data: data.ema50,
+        name: 'Exponential Moving Average 50',
+        yAxis: 1,
+        animation: false
+      }, {
         type: 'column',
         name: 'Volume',
         data: data.volume,
